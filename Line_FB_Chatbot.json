@@ -1,0 +1,835 @@
+{
+  "name": "Line_FB_Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "20e59ee2-473a-4e8b-a446-c7271a4e7333",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -760,
+        -60
+      ],
+      "id": "4eb3b85c-d6a6-49ec-9f72-1401f4d6a86d",
+      "name": "Webhook",
+      "webhookId": "20e59ee2-473a-4e8b-a446-c7271a4e7333"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User Input:\n{{ $json.body.events[0].message.text }}",
+        "options": {
+          "systemMessage": "=บทบาท: คุณคือแอดมินพนักงานต้อนรับของ [Hotel Name] โรงแรมธุรกิจร่วมสมัยในนนทบุรี สำหรับนักธุรกิจ งานสัมมนา และอีเวนต์\n\nหน้าที่: ตอบลูกค้าอย่างสุภาพ เป็นมิตร อ่อนหวาน ตรงประเด็น แทนตัวเองว่า \"แอดมิน\"\n\nกฎการตอบ:\n- ใช้ HotelInfo เพื่อตอบ ถ้าไม่มีข้อมูลให้ตอบว่า แอดมินจะประสานเจ้าหน้าที่ที่เกี่ยวข้องให้ติดต่อกลับโดยเร็วที่สุดนะคะ\n- ทักทายเฉพาะครั้งแรก: สวัสดีค่ะ แอดมิน [Hotel Name] ยินดีให้บริการค่ะ\n- ถามเรื่องห้องพัก: บอกว่ามีหรือไม่ ระบุราคา แนะนำห้องใกล้เคียงได้\n- ถ้าจองห้อง: ตอบว่า แอดมินจะติดต่อเจ้าหน้าที่เพื่อตรวจสอบและทำการจองให้นะคะ กรุณารอสักครู่\n- ถามทั่วไป: ให้ข้อมูลห้องพักและบริการคร่าว ๆ\n- ถ้าเข้าใจผิดว่าเป็นโรงแรมอื่น: ชี้แจงว่าเป็น [Hotel Name] ตั้งอยู่ที่ [Hotel Location]แล้วแจ้งข้อมูลติดต่อโรงแรมที่เข้าใจผิดแทน\n\nห้ามแต่งเรื่องเพิ่มเอง ตอบตามข้อมูลจริงเท่านั้น"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        360,
+        -20
+      ],
+      "id": "e9f5f251-ff04-4909-aacc-5f022741c9db",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        320,
+        160
+      ],
+      "id": "326400dc-bf2e-42c6-88cf-f46225ad4c7b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wdAL111QdeNmFdyx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cbd53a28-c4b2-4da2-a826-b4648e412cda",
+              "name": "sender.id",
+              "value": "={{ $json.body.entry[0].messaging[0].sender.id }}",
+              "type": "string"
+            },
+            {
+              "id": "e04d4a42-aa18-4107-8a1f-ab2566723ce4",
+              "name": "recipient.id",
+              "value": "={{ $json.body.entry[0].messaging[0].recipient.id }}",
+              "type": "string"
+            },
+            {
+              "id": "0ca03b16-7612-4656-9cf8-94d10cfa6bc6",
+              "name": "message.text",
+              "value": "={{ $json.body.entry[0].messaging[0].message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "1b1d39a8-a75f-489c-9cce-5d8fcc038b49",
+              "name": "body.events[0].message.text",
+              "value": "={{ $json.body.events[0].message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "262ebb89-8823-48cc-b48c-0df1b18353c5",
+              "name": "body.events[0].replyToken",
+              "value": "={{ $json.body.events[0].replyToken }}",
+              "type": "string"
+            },
+            {
+              "id": "3548c879-ee88-4b68-b8fa-2d0ebf455e17",
+              "name": "body.events[0].source.userId",
+              "value": "={{ $json.body.events[0].source.userId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -260,
+        -60
+      ],
+      "id": "0e2077a5-b273-4321-9a69-e0df25cdd214",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json.body.events[0].source.userId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        160
+      ],
+      "id": "ccf56600-48f2-48db-b8a2-17dc275ee744",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"replyToken\":\"{{ $('Edit Fields').item.json.body.events[0].replyToken }}\",\n    \"messages\":[\n        {\n            \"type\":\"text\",\n            \"text\":\"{{ $json.output.replace(/\\n/g, \"\\\\n\").replace(/(?:\\r\\n|\\n|\\r|\\t|\\n|<[^>]+>)/g, '').replace(/\\s{2,}/g, '').replace(/\"/g, '') }}\"\n        }\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        -20
+      ],
+      "id": "ca09c846-97f9-43bd-aff3-f403657e9f5a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "description": "HotelInfo\nRetrive information from any company documents",
+        "topK": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        600,
+        160
+      ],
+      "id": "7fc58e77-d5b9-4b52-a121-fd651d444094",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "sahaindex",
+          "mode": "list",
+          "cachedResultName": "sahaindex"
+        },
+        "options": {
+          "pineconeNamespace": "itemdb"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        380,
+        300
+      ],
+      "id": "e076f191-8826-4d02-a2f1-fec3aff920c6",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "FKyDf2QQhYrYEhF8",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        380,
+        440
+      ],
+      "id": "e3961127-c85f-45e2-878e-504c179750c0",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wdAL111QdeNmFdyx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        640,
+        300
+      ],
+      "id": "0309b305-487d-46d2-9894-28edf2045246",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wdAL111QdeNmFdyx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ed3e118a-b9f8-4adc-b93c-6e7962574d0c",
+              "name": "query['hub.challenge']",
+              "value": "={{ $json.query['hub.challenge'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -520,
+        -260
+      ],
+      "id": "a36dc476-cf1f-47c8-a769-39e197cd1377",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -360,
+        -260
+      ],
+      "id": "78611dd6-4372-424f-9a0e-f4a3a6c710c5",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User Input:\n{{ $('Edit Fields').item.json.message.text }}",
+        "options": {
+          "systemMessage": "=บทบาท: คุณคือแอดมินพนักงานต้อนรับของ [Hotel Name] โรงแรมธุรกิจร่วมสมัยในนนทบุรี สำหรับนักธุรกิจ งานสัมมนา และอีเวนต์\n\nหน้าที่: ตอบลูกค้าอย่างสุภาพ เป็นมิตร อ่อนหวาน ตรงประเด็น แทนตัวเองว่า \"แอดมิน\"\n\nกฎการตอบ:\n- ใช้ HotelInfo เพื่อตอบ ถ้าไม่มีข้อมูลให้ตอบว่า แอดมินจะประสานเจ้าหน้าที่ที่เกี่ยวข้องให้ติดต่อกลับโดยเร็วที่สุดนะคะ\n- ทักทายเฉพาะครั้งแรก: สวัสดีค่ะ แอดมิน [Hotel Name] ยินดีให้บริการค่ะ\n- ถามเรื่องห้องพัก: บอกว่ามีหรือไม่ ระบุราคา แนะนำห้องใกล้เคียงได้\n- ถ้าจองห้อง: ตอบว่า แอดมินจะติดต่อเจ้าหน้าที่เพื่อตรวจสอบและทำการจองให้นะคะ กรุณารอสักครู่\n- ถามทั่วไป: ให้ข้อมูลห้องพักและบริการคร่าว ๆ\n- ถ้าเข้าใจผิดว่าเป็นโรงแรมอื่น: ชี้แจงว่าเป็น [Hotel Name] ตั้งอยู่ที่ [Hotel Location]แล้วแจ้งข้อมูลติดต่อโรงแรมที่เข้าใจผิดแทน\n\nห้ามแต่งเรื่องเพิ่มเอง ตอบตามข้อมูลจริงเท่านั้น"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        440,
+        -660
+      ],
+      "id": "e09068c6-c62a-4b85-9308-cce775c6a4cb",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -480
+      ],
+      "id": "55583c27-aefb-481b-8793-96120580601c",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wdAL111QdeNmFdyx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json.sender.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        -480
+      ],
+      "id": "f9858191-c738-49cf-812c-28b8158b55d4",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v23.0/{{ $('Edit Fields').item.json.recipient.id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $('Edit Fields').item.json.sender.id }}\"\n  },\n  \"message\": {\n    \"text\": \"{{ $json.output.replace(/\\n/g, \"\\\\n\").replace(/(?:\\r\\n|\\n|\\r|\\t|\\n|<[^>]+>)/g, '').replace(/\\s{2,}/g, '').replace(/\"/g, '') }}\"\n  },\n    \"messaging_type\": \"RESPONSE\"\n}\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        -660
+      ],
+      "id": "4e4101f4-adff-4fb6-bdbd-49490d26986b",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "description": "HotelInfo\nRetrive information from any company documents",
+        "topK": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        -480
+      ],
+      "id": "c0b0628f-5d0b-4f24-bdab-e5ccb90ce637",
+      "name": "Answer questions with a vector store1"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "sahaindex",
+          "mode": "list",
+          "cachedResultName": "sahaindex"
+        },
+        "options": {
+          "pineconeNamespace": "itemdb"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        460,
+        -340
+      ],
+      "id": "df3b2767-f5c8-4963-a0b4-0bca7392c3f3",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "FKyDf2QQhYrYEhF8",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        460,
+        -200
+      ],
+      "id": "b21e1f7f-db4a-4bc1-9769-72adae36c0db",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wdAL111QdeNmFdyx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -340
+      ],
+      "id": "d00ae88e-2727-42cf-8f76-8c7466700e1f",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wdAL111QdeNmFdyx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d9f73716-f133-4f8a-89e3-03ec08529348",
+              "leftValue": "=facebookexternalua",
+              "rightValue": "={{ $('Webhook').item.json.headers['user-agent'] }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -60,
+        -60
+      ],
+      "id": "d258f94b-15ea-4de6-ae14-2ede4b69873c",
+      "name": "If_fb"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d9f73716-f133-4f8a-89e3-03ec08529348",
+              "leftValue": "={{ \n  // Check if current time is between 5 PM and 6 AM.\n  // The getHours() method returns the hours as a number (0-23)\n  new Date().getHours() >= 17 || new Date().getHours() < 6 \n}}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -520,
+        -60
+      ],
+      "id": "994c5e6d-b945-4ff3-a99c-2777c3cb0139",
+      "name": "If_night_time"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7e512744-6624-4849-86e7-e13b0e7bacd0",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        -260
+      ],
+      "id": "958cdb37-2479-4a64-94ec-5b278b24574f",
+      "name": "If_message"
+    },
+    {
+      "parameters": {
+        "content": "## Facebook Connection",
+        "height": 260,
+        "width": 440,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -600,
+        -340
+      ],
+      "typeVersion": 1,
+      "id": "7fb2909a-2e2c-435e-ac1d-794c9f6292f0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Facebook",
+        "height": 620,
+        "width": 900,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        100,
+        -680
+      ],
+      "typeVersion": 1,
+      "id": "07854b51-5a44-4739-9e75-855fc9a8fec0",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Line",
+        "height": 620,
+        "width": 900,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        100,
+        -40
+      ],
+      "typeVersion": 1,
+      "id": "27a77cff-55d2-4889-b924-88fecab7420d",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If_night_time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If_fb",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store1",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If_fb": {
+      "main": [
+        [
+          {
+            "node": "If_message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If_night_time": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If_message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "25a19a8f-ba1e-46e9-bc62-2109d1d8cbc1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a7768f440ade0a2b28d40a60ece3f742820c5bce032f24338b052ce588ae8e2f"
+  },
+  "id": "Gclx7vJ2gncIcT7Q",
+  "tags": [
+    {
+      "createdAt": "2025-07-13T09:55:24.123Z",
+      "updatedAt": "2025-07-13T09:55:24.123Z",
+      "id": "etQj19bs2MHRs4Sm",
+      "name": "delete"
+    }
+  ]
+}
